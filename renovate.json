@@ -1,0 +1,60 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["visualon/renovate-config", "visualon/renovate-config:automergePatch"],
+  "labels": ["deps"],
+  "digest": {
+    "extends": ["schedule:daily"]
+  },
+  "automergeType": "pr",
+  "platformAutomerge": true,
+  "ignorePaths": ["**/node_modules/**"],
+  "packageRules": [
+    {
+      "description": "Override git versioning for windows",
+      "matchPackageNames": ["git"],
+      "matchPaths": ["windows/**"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>\\.windows\\.)(?<build>\\d+)$"
+    },
+    {
+      "description": "Automerge buildpack minor updates",
+      "matchPackageNames": ["ghcr.io/containerbase/base"],
+      "extends": [":automergeMinor"]
+    },
+    {
+      "description": "Group windows docker digest updates updates",
+      "matchPackagePrefixes": ["mcr.microsoft.com/windows/"],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["digest"],
+      "groupName": "windows docker digests"
+    },
+    {
+      "description": "Trigger fix release for deps updates",
+      "matchPaths": ["**/Dockerfile", "**/Dockerfile.*"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "Trigger feat release for deps updates",
+      "matchPaths": ["**/Dockerfile", "**/Dockerfile.*"],
+      "matchUpdateTypes": ["major"],
+      "semanticCommitType": "feat"
+    },
+    {
+      "description": "Use `test` semantic commit scope for tests",
+      "matchPaths": ["**/test/**"],
+      "additionalBranchPrefix": "test-",
+      "semanticCommitType": "test"
+    },
+    {
+      "description": "Separate branches for test major updates",
+      "matchPaths": ["**/test/**"],
+      "matchUpdateTypes": ["major"],
+      "additionalBranchPrefix": "test-major-"
+    },
+    {
+      "description": "Minio versioning",
+      "matchPackageNames": ["minio-client"],
+      "versioning": "regex:^(?<compatibility>RELEASE\\.)(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T(?<build>\\d+)-\\d+-\\d+Z$"
+    }
+  ]
+}
